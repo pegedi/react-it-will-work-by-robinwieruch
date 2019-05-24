@@ -31,39 +31,64 @@ const list = [
   },
 ];
 
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
+const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {list: list,
+    this.state = {result: null,
       name: 'React',
-      searchTerm: '',
+      searchTerm: DEFAULT_QUERY,
     };
 
     this.setState({list: list});
     this.logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
     
+    this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
   }
+  
+  setSearchTopStories (result) {
+    this.setState({result});
+    console.log(result);
+  }
+
+
+
   onDismiss(id) {
-    console.log('Goodbye onDismiss ' + id);
+    console.log('Goodbye onDismiss, ID:  ' + id);
     const isNotId = item => item.objectID !== id;
-    const updatedList = this.state.list.filter(isNotId);
-    this.setState({ list: updatedList });
+    const updatedList = this.state.result.hits.filter(isNotId);
+    this.setState({ 
+      result: Object.assign({},this.state.result, {hits: updatedList}) 
+    });
   }
   onUpdate(id) {
     console.log('Hello onUpdate ' + id);
     const isNotId = item => item.objectID !== id;
-    const indexnum = this.state.list.findIndex(e => e.objectID == id);
-    this.setState(update(this.state, {list: {[indexnum]: {author: {$set: "Peti"}}}}));
+    const indexnum = this.state.result.hits.findIndex(e => e.objectID == id);
+    this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
   }
   onSearchChange(e) {
     this.setState({searchTerm: e.target.value});
   }
-
+  componentDidMount() {
+    const { searchTerm } = this.state;
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
+}
   render() {
-    const { searchTerm, list } = this.state;
+    const { searchTerm, result } = this.state;
+    if (!result) { return  null;   }
+
     return (
       <div className="App">
         <header className="App-header">
@@ -71,6 +96,7 @@ class App extends Component {
           <img src={this.logo} className="App-logo" alt="logo" />
           <p>            
             Start editing to see some magic happen :)
+          </p>
             <Search
               value = {searchTerm}
               onChange = {this.onSearchChange}
@@ -78,14 +104,14 @@ class App extends Component {
               Keress csak
             </Search>
             <Table
-              list = {this.state.list}
+              list = {result.hits}
               pattern = {searchTerm}
               onDismiss ={this.onDismiss}
               onUpdate ={this.onUpdate}
             />
            
             {/*console.log(DisplayArray(list))*/}
-          </p>
+         
           <p>
              Edit <code>App.js</code> and save to reload. Actually no save needed....
           </p>
