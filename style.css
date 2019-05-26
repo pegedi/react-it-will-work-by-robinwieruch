@@ -4,6 +4,12 @@ h1, p {
 .App {
   text-align: center;
 }
+.page {
+margin: 20px;
+}
+.interactions {
+text-align: center;
+}
 
 .App-logo {
   animation: App-logo-spin infinite 20s linear;

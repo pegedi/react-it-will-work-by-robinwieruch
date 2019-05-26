@@ -90,8 +90,8 @@ class App extends Component {
     if (!result) { return  null;   }
 
     return (
-      <div className="App">
-        <header className="App-header">
+      <div className="page">
+        <div className="interactions">
           <Hello name={this.state.name} />
           <img src={this.logo} className="App-logo" alt="logo" />
           <p>            
@@ -103,13 +103,15 @@ class App extends Component {
             >
               Keress csak
             </Search>
-            <Table
-              list = {result.hits}
-              pattern = {searchTerm}
-              onDismiss ={this.onDismiss}
-              onUpdate ={this.onUpdate}
-            />
-           
+            { result
+              ? <Table
+                list = {result.hits}
+                pattern = {searchTerm}
+                onDismiss ={this.onDismiss}
+                onUpdate ={this.onUpdate}
+              />
+              : null
+            }
             {/*console.log(DisplayArray(list))*/}
          
           <p>
@@ -122,7 +124,7 @@ class App extends Component {
             rel="noopener noreferrer">
             Learn React
           </a>
-        </header>
+        </div>
       </div>
     );
   }
