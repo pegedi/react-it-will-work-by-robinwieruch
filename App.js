@@ -4,32 +4,7 @@ import update from 'immutability-helper';
 import Hello from './Hello';
 import './style.css';
 
-const list = [
-  {
-    title: 'React',
-    url: 'https://reactjs.org/',
-    author: 'Jordan Walke',
-    num_comments: 3,
-    points: 4,
-    objectID: 0,
-  },
-  {
-    title: 'Redux',
-    url: 'https://redux.js.org/',
-    author: 'Dan Abramov, Andrew Clark',
-    num_comments: 2,
-    points: 5,
-    objectID: 1,
-  },
-  {
-    title: 'Github',
-    url: 'https://github.com/',
-    author: 'Hyatt',
-    num_comments: 2,
-    points: 5,
-    objectID: 2,
-  },
-];
+
 
 const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
@@ -44,16 +19,30 @@ class App extends Component {
       name: 'React',
       searchTerm: DEFAULT_QUERY,
     };
-
-    this.setState({list: list});
     this.logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
     
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
     this.onSearchChange = this.onSearchChange.bind(this);
+    this.onSearchSubmit = this.onSearchSubmit.bind(this);
+    this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
   }
-  
+  fetchSearchTopStories(searchTerm){
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+      .then(response => response.json())
+      .then(result => this.setSearchTopStories(result))
+      .catch(error => error);
+  }
+  onSearchSubmit(event) {
+    console.log("On Search Submit");
+    event.preventDefault();
+    const {searchTerm} = this.state;
+    this.fetchSearchTopStories(searchTerm);
+    
+
+
+  }
   setSearchTopStories (result) {
     this.setState({result});
     console.log(result);
@@ -76,18 +65,17 @@ class App extends Component {
     this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
   }
   onSearchChange(e) {
+    console.log(e.target.value);
     this.setState({searchTerm: e.target.value});
   }
   componentDidMount() {
     const { searchTerm } = this.state;
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
-      .then(response => response.json())
-      .then(result => this.setSearchTopStories(result))
-      .catch(error => error);
-}
+    console.log("component mount");
+    this.fetchSearchTopStories(searchTerm);
+
+  }
   render() {
     const { searchTerm, result } = this.state;
-    if (!result) { return  null;   }
 
     return (
       <div className="page">
@@ -100,13 +88,13 @@ class App extends Component {
             <Search
               value = {searchTerm}
               onChange = {this.onSearchChange}
+              onSubmit = {this.onSearchSubmit}
             >
               Keress csak
             </Search>
             { result
               ? <Table
                 list = {result.hits}
-                pattern = {searchTerm}
                 onDismiss ={this.onDismiss}
                 onUpdate ={this.onUpdate}
               />
@@ -130,23 +118,25 @@ class App extends Component {
   }
 }
 
-const Search = ({value, onChange, children}) => {
+const Search = ({value, onChange, onSubmit, children}) => {
   //do something here
   return (
-    <form>
-      {children}
+    <form onSubmit = {onSubmit}>
       <input
         type = "text"
         value = {value}
         onChange = {onChange}
       />
+      <button type = "submit">
+        {children}
+      </button>
     </form>
   );
 }
-const Table = ({list, pattern, onDismiss, onUpdate}) => {
+const Table = ({list, onDismiss, onUpdate}) => {
   //some code or action go here
   return(
-    list.filter(item => item.title.toLowerCase().includes(pattern)).map(item => {
+    list.map(item => {
       return (
         <div key={item.objectID}> 
           <span> <a href={item.url}> {item.title} </a></span>
