@@ -38,6 +38,7 @@ class App extends Component {
     console.log("On Search Submit");
     event.preventDefault();
     const {searchTerm} = this.state;
+    console.log(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`);
     this.fetchSearchTopStories(searchTerm);
     
 
@@ -45,7 +46,7 @@ class App extends Component {
   }
   setSearchTopStories (result) {
     this.setState({result});
-    console.log(result);
+   // console.log(result);
   }
 
 
@@ -65,7 +66,7 @@ class App extends Component {
     this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
   }
   onSearchChange(e) {
-    console.log(e.target.value);
+   //console.log(e.target.value);
     this.setState({searchTerm: e.target.value});
   }
   componentDidMount() {
