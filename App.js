@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import update from 'immutability-helper';
 import SimpleTable from './SimpleTable';
 import Hello from './Hello';
-//import './style.css';
+import Button from '@material-ui/core/Button';
+import './style.css';
 
 
 
@@ -19,7 +20,6 @@ class App extends Component {
       name: 'React',
       searchTerm: DEFAULT_QUERY,
     };
-    this.logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
     
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
@@ -80,7 +80,6 @@ class App extends Component {
       <div className="page">
         <div className="interactions">
           <Hello name={this.state.name} />
-          <img src={this.logo} className="App-logo" alt="logo" />
           <p>            
             Start editing to see some magic happen :)
           </p>
@@ -122,6 +121,7 @@ class App extends Component {
 
 const Search = ({value, onChange, onSubmit, children}) => {
   //do something here
+  const logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
   return (
     <form onSubmit = {onSubmit}>
       <input
@@ -129,9 +129,10 @@ const Search = ({value, onChange, onSubmit, children}) => {
         value = {value}
         onChange = {onChange}
       />
-      <button type = "submit">
+      <Button variant="contained" color="primary" type = "submit">
         {children}
-      </button>
+        <img src={logo} className="App-logo" alt="logo" />
+      </Button>
     </form>
   );
 }
