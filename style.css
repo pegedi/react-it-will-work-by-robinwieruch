@@ -12,8 +12,8 @@ text-align: center;
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 3em;
+  animation: App-logo-spin infinite 8s linear;
+  height: 3rem;
   pointer-events: none;
 }
 

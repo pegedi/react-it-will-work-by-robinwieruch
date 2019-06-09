@@ -3,6 +3,9 @@ import update from 'immutability-helper';
 import SimpleTable from './SimpleTable';
 import Hello from './Hello';
 import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import { makeStyles } from '@material-ui/core/styles';
+
 import './style.css';
 
 
@@ -12,6 +15,27 @@ const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
+
+const useStyles = makeStyles(theme => ({
+  container: {
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
+  textField: {
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+  dense: {
+    marginTop: theme.spacing(2),
+  },
+  menu: {
+    width: 200,
+  },
+  button: {
+    verticalAlign: '-35px'
+  },
+}));
+
 
 class App extends Component {
   constructor(props) {
@@ -88,7 +112,7 @@ class App extends Component {
               onChange = {this.onSearchChange}
               onSubmit = {this.onSearchSubmit}
             >
-              Keress csak
+              Search
             </Search>
             { result
               ? <SimpleTable
@@ -122,14 +146,24 @@ class App extends Component {
 const Search = ({value, onChange, onSubmit, children}) => {
   //do something here
   const logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
+  const classes = useStyles();
+
   return (
     <form onSubmit = {onSubmit}>
-      <input
-        type = "text"
-        value = {value}
+       <TextField
+        id="outlined-search"
+        label="Search field"
+        type="search"
+        className={classes.textField}
+        margin="normal"
+        variant="outlined"
+        value={value}
         onChange = {onChange}
       />
-      <Button variant="contained" color="primary" type = "submit">
+
+      
+ 
+      <Button variant="contained" color="primary" type = "submit" className={classes.button}>
         {children}
         <img src={logo} className="App-logo" alt="logo" />
       </Button>
