@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import update from 'immutability-helper';
-
+import SimpleTable from './SimpleTable';
 import Hello from './Hello';
-import './style.css';
+//import './style.css';
 
 
 
@@ -40,16 +40,12 @@ class App extends Component {
     const {searchTerm} = this.state;
     console.log(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`);
     this.fetchSearchTopStories(searchTerm);
-    
-
-
   }
+
   setSearchTopStories (result) {
     this.setState({result});
    // console.log(result);
   }
-
-
 
   onDismiss(id) {
     console.log('Goodbye onDismiss, ID:  ' + id);
@@ -59,16 +55,18 @@ class App extends Component {
       result: Object.assign({},this.state.result, {hits: updatedList}) 
     });
   }
+
   onUpdate(id) {
     console.log('Hello onUpdate ' + id);
     const isNotId = item => item.objectID !== id;
-    const indexnum = this.state.result.hits.findIndex(e => e.objectID == id);
+    const indexnum = this.state.result.hits.findIndex(e => e.objectID === id);
     this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
   }
   onSearchChange(e) {
    //console.log(e.target.value);
     this.setState({searchTerm: e.target.value});
   }
+
   componentDidMount() {
     const { searchTerm } = this.state;
     console.log("component mount");
@@ -94,8 +92,11 @@ class App extends Component {
               Keress csak
             </Search>
             { result
-              ? <Table
-                list = {result.hits}
+              ? <SimpleTable
+                list = {Object.assign(
+                          {}, 
+                          {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
+                          {adat: result.hits})}
                 onDismiss ={this.onDismiss}
                 onUpdate ={this.onUpdate}
               />
@@ -134,46 +135,6 @@ const Search = ({value, onChange, onSubmit, children}) => {
     </form>
   );
 }
-const Table = ({list, onDismiss, onUpdate}) => {
-  //some code or action go here
-  return(
-    list.map(item => {
-      return (
-        <div key={item.objectID}> 
-          <span> <a href={item.url}> {item.title} </a></span>
-          <span> {item.author} </span>
-          <span> {item.num_comments} </span>
-          <span> {item.points} </span>
-          <span>
-            <Button 
-              onClick={() => onDismiss(item.objectID)}
-              className = ''
-             >
-              Dismiss
-             </Button>
-            <Button
-              onClick = {() => onUpdate(item.objectID)}
-             >
-              PETI
-             </Button>
-            </span>
-         </div>
-       );
-     }
-     )
-  );
-}
-const Button = ({onClick,className = '', children}) => {
-  //your code goes here
-  return(
-    <button
-      onClick = {onClick}
-      className = {className}
-      type = "button"
-     >
-      {children}
-     </button>    
-  );
-}
+
 
 export default App; 
