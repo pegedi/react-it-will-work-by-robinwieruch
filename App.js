@@ -5,6 +5,12 @@ import Hello from './Hello';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import { makeStyles } from '@material-ui/core/styles';
+import TablePagination from '@material-ui/core/TablePagination';
+import IconButton from '@material-ui/core/IconButton';
+import FirstPageIcon from '@material-ui/icons/FirstPage';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import LastPageIcon from '@material-ui/icons/LastPage';
 
 import './style.css';
 
@@ -14,6 +20,7 @@ const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
+const PARAM_PAGE = 'page=';
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 
 const useStyles = makeStyles(theme => ({
@@ -52,8 +59,8 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
   }
-  fetchSearchTopStories(searchTerm){
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+  fetchSearchTopStories(searchTerm, page = 0){
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
@@ -67,7 +74,13 @@ class App extends Component {
   }
 
   setSearchTopStories (result) {
-    this.setState({result});
+    const { hits, page } = result;
+    const oldhits = page !==0 ? this.state.result.hits : [];
+    const updatedHits =[...oldhits, ...hits];
+
+    this.setState({result: { hits: updatedHits, page }});
+
+    //this.setState({result});
    // console.log(result);
   }
 
@@ -99,6 +112,10 @@ class App extends Component {
   }
   render() {
     const { searchTerm, result } = this.state;
+    const page = (result && result.page) || 0;
+    const nbPages = (result && result.nbPages) || 0;
+    const hitsPerPage = (result && result.hitsPerPage) || 0;
+    console.log(result);
 
     return (
       <div className="page">
@@ -114,18 +131,21 @@ class App extends Component {
             >
               Search
             </Search>
-            { result
-              ? <SimpleTable
-                list = {Object.assign(
-                          {}, 
-                          {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
-                          {adat: result.hits})}
-                onDismiss ={this.onDismiss}
-                onUpdate ={this.onUpdate}
+            { result && <SimpleTable
+                    list = {Object.assign(
+                              {}, 
+                              {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
+                              {adat: result.hits})}
+                    onDismiss ={this.onDismiss}
+                    onUpdate ={this.onUpdate}
               />
-              : null
+              
             }
-            {/*console.log(DisplayArray(list))*/}
+            <div className="interactions">
+                <Button variant="contained" color="primary" onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+                  More
+                </Button>
+            </div>
          
           <p>
              Edit <code>App.js</code> and save to reload. Actually no save needed....
