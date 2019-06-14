@@ -7,6 +7,13 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import TablePagination from '@material-ui/core/TablePagination';
+import IconButton from '@material-ui/core/IconButton';
+import FirstPageIcon from '@material-ui/icons/FirstPage';
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
+import LastPageIcon from '@material-ui/icons/LastPage';
+import TableFooter from '@material-ui/core/TableFooter';
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -61,6 +68,21 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                         </TableRow>
                     ))}
                 </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      rowsPerPageOptions={[5, 10, 25]}
+                      colSpan={3}
+                      count={20}
+                      rowsPerPage={20}
+                      page={0}
+                      SelectProps={{
+                        inputProps: { 'aria-label': 'Rows per page' },
+                        native: true,
+                        }}
+                    />
+            </TableRow>
+          </TableFooter>
             </Table>
         </Paper>
     );
