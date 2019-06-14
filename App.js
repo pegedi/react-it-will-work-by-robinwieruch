@@ -21,6 +21,7 @@ const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
+const PARAM_HITSPERPAGE = 'hitsPerPage='
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 
 const useStyles = makeStyles(theme => ({
@@ -50,6 +51,7 @@ class App extends Component {
     this.state = {result: null,
       name: 'React',
       searchTerm: DEFAULT_QUERY,
+      hitsPerPage: 20,
     };
     
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -59,8 +61,8 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
   }
-  fetchSearchTopStories(searchTerm, page = 0){
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}`)
+  fetchSearchTopStories(searchTerm, page = 0, hitsPerPage = 20){
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HITSPERPAGE}${hitsPerPage}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
@@ -68,17 +70,18 @@ class App extends Component {
   onSearchSubmit(event) {
     console.log("On Search Submit");
     event.preventDefault();
-    const {searchTerm} = this.state;
-    console.log(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`);
-    this.fetchSearchTopStories(searchTerm);
+    const {searchTerm, hitsPerPage} = this.state;
+    this.fetchSearchTopStories(searchTerm, 0, hitsPerPage);
   }
 
   setSearchTopStories (result) {
-    const { hits, page } = result;
+    console.log("setSearchTopStories:");
+    console.log(result);
+    const { hits, page, nbHits, nbPages } = result;
     const oldhits = page !==0 ? this.state.result.hits : [];
     const updatedHits =[...oldhits, ...hits];
 
-    this.setState({result: { hits: updatedHits, page }});
+    this.setState({result: { hits, page, nbHits, nbPages, hitsPerPage: this.hitsPerPage }});
 
     //this.setState({result});
    // console.log(result);
@@ -114,7 +117,7 @@ class App extends Component {
     const { searchTerm, result } = this.state;
     const page = (result && result.page) || 0;
     const nbPages = (result && result.nbPages) || 0;
-    const hitsPerPage = (result && result.hitsPerPage) || 0;
+    const hitsPerPage = this.state.hitsPerPage;
     console.log(result);
 
     return (
@@ -135,14 +138,16 @@ class App extends Component {
                     list = {Object.assign(
                               {}, 
                               {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
-                              {adat: result.hits})}
+                              {adat: result.hits},
+                              hitsPerPage,
+                              )}
                     onDismiss ={this.onDismiss}
                     onUpdate ={this.onUpdate}
               />
               
             }
             <div className="interactions">
-                <Button variant="contained" color="primary" onClick={() => this.fetchSearchTopStories(searchTerm, page + 1)}>
+                <Button variant="contained" color="primary" onClick={() => this.fetchSearchTopStories(searchTerm, page + 1, hitsPerPage)}>
                   More
                 </Button>
             </div>

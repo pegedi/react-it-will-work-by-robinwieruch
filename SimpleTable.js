@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -73,8 +73,8 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                     <TablePagination
                       rowsPerPageOptions={[5, 10, 25]}
                       colSpan={3}
-                      count={20}
-                      rowsPerPage={20}
+                      count={1000}
+                      rowsPerPage={10}
                       page={0}
                       SelectProps={{
                         inputProps: { 'aria-label': 'Rows per page' },
