@@ -79,9 +79,9 @@ class App extends Component {
     console.log(result);
     const { hits, page, nbHits, nbPages } = result;
     const oldhits = page !==0 ? this.state.result.hits : [];
-    const updatedHits =[...oldhits, ...hits];
+    const updatedHits = [...oldhits, ...hits] ;
 
-    this.setState({result: { hits, page, nbHits, nbPages, hitsPerPage: this.hitsPerPage }});
+    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage: this.hitsPerPage }});
 
     //this.setState({result});
    // console.log(result);
@@ -134,7 +134,7 @@ class App extends Component {
             >
               Search
             </Search>
-            { result && <SimpleTable
+            { result && result.hits && <SimpleTable
                     list = {Object.assign(
                               {}, 
                               {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},

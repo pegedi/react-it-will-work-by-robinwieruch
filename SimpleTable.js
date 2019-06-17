@@ -34,9 +34,11 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                         {list.headerRow.map( field => (
                             <TableCell>{field}</TableCell>
                         ))}
+
                     </TableRow>
                 </TableHead>
                 <TableBody>
+                    
                     {list.adat.map(row => (
                         <TableRow key={row.objectID} hover>
                             <TableCell><a href={row.url}> {row.title} </a> </TableCell>
