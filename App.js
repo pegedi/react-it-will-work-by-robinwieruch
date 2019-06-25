@@ -61,6 +61,13 @@ class App extends Component {
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
   }
+
+/**
+ * very important function
+ * @param {string} searchTerm some search term
+ * @param {number} page page number to fetch from the server
+ * @param {number} hitsperPage hits per page
+ */
   fetchSearchTopStories(searchTerm, page = 0, hitsPerPage = 20){
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HITSPERPAGE}${hitsPerPage}`)
       .then(response => response.json())
