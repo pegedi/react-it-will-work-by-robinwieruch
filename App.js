@@ -41,7 +41,6 @@ const useStyles = makeStyles(theme => ({
   },
   button: {
     verticalAlign: '-35px',
-    zIndex: '-1',
   },
 }));
 

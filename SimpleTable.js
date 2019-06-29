@@ -21,13 +21,12 @@ const useStyles = makeStyles(theme => ({
       minWidth: 650,
     },
     head: {
-      backgroundColor: "white",
+      backgroundColor: "lightgrey",
       position: "sticky",
       top: "0px",
       zIndex: '10',
     },
     button: {
-      zIndex: '-1',
     },
   })
 );
