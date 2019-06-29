@@ -15,10 +15,19 @@ const useStyles = makeStyles(theme => ({
     root: {
       width: '100%',
       marginTop: theme.spacing(3),
-      overflowX: 'auto',
+ //     overflowX: 'auto',
     },
     table: {
       minWidth: 650,
+    },
+    head: {
+      backgroundColor: "white",
+      position: "sticky",
+      top: "0px",
+      zIndex: '10',
+    },
+    button: {
+      zIndex: '-1',
     },
   })
 );
@@ -27,12 +36,12 @@ function SimpleTable({list, onDismiss, onUpdate}) {
     const classes = useStyles();
     
     return (
-        <Paper className={classes.root}>
+       <Paper className={classes.root}>
             <Table className = {classes.table}>
                 <TableHead>
                     <TableRow key="-1">
                         {list.headerRow.map( field => (
-                            <TableCell>{field}</TableCell>
+                            <TableCell className={classes.head}>{field}</TableCell>
                         ))}
 
                     </TableRow>
@@ -71,8 +80,10 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                     Valami
                   </TableRow>
                  </TableFooter>
-            </Table>
+            
+          </Table>
         </Paper>
+       
     );
 }
 
