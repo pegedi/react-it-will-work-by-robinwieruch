@@ -147,7 +147,7 @@ class App extends Component {
                               {}, 
                               {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
                               {adat: result.hits},
-                              hitsPerPage,
+                              {hitsPerPage},
                               )}
                     onDismiss ={this.onDismiss}
                     onUpdate ={this.onUpdate}

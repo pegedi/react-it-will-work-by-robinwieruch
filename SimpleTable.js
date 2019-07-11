@@ -7,7 +7,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
 import TablePagination from '@material-ui/core/TablePagination';
+import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 
 import TableFooter from '@material-ui/core/TableFooter';
 
@@ -33,7 +35,8 @@ const useStyles = makeStyles(theme => ({
 
 function SimpleTable({list, onDismiss, onUpdate}) {
     const classes = useStyles();
-    
+    console.log("SimpleTable renders:");
+    console.log(list);
     return (
        <Paper className={classes.root}>
             <Table className = {classes.table}>
@@ -76,17 +79,17 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                 </TableBody>
                 <TableFooter>
                   <TableRow key= "-2">
-                    <TableCell>
+                    
                        <TablePagination
-                          rowsPerPageOptions={[20, 40, 80]}
+                          rowsPerPageOptions={[10, 20, 40, 80]}
                           rowsPerPage={list.hitsPerPage}
                           SelectProps={{
                             inputProps: { 'aria-label': 'Rows per page' },
                             native: true,
                             }}
+                          ActionsComponent={TablePaginationActions}
                               />
-                    </TableCell>
-                  </TableRow>
+                    </TableRow>
                  </TableFooter>
             
           </Table>
@@ -111,6 +114,17 @@ const useStyles1 = makeStyles(theme => ({
 function TablePaginationActions(props) {
   const classes = useStyles1();
   const theme = useTheme();
-  const { page, nbHIts, hitsPerPage, onChangePage } = props;
+  const { page, nbHits, hitsPerPage, onChangePage } = props;
+  return (
+    <div className={classes.root}>
+      <IconButton
+        
+        
+        aria-label="Next"
+      >
+        <KeyboardArrowDown />
+      </IconButton>
+    </div>
+  );
 
 }
