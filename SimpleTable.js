@@ -75,8 +75,17 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                     ))}
                 </TableBody>
                 <TableFooter>
-                  <TableRow>
-                    Valami
+                  <TableRow key= "-2">
+                    <TableCell>
+                       <TablePagination
+                          rowsPerPageOptions={[20, 40, 80]}
+                          rowsPerPage={list.hitsPerPage}
+                          SelectProps={{
+                            inputProps: { 'aria-label': 'Rows per page' },
+                            native: true,
+                            }}
+                              />
+                    </TableCell>
                   </TableRow>
                  </TableFooter>
             
@@ -87,3 +96,21 @@ function SimpleTable({list, onDismiss, onUpdate}) {
 }
 
 export default SimpleTable;
+
+/**
+ * pagination function
+ */
+const useStyles1 = makeStyles(theme => ({
+  root: {
+    flexShrink: 0,
+    color: theme.palette.text.secondary,
+    marginLeft: theme.spacing(2.5),
+  },
+}));
+
+function TablePaginationActions(props) {
+  const classes = useStyles1();
+  const theme = useTheme();
+  const { page, nbHIts, hitsPerPage, onChangePage } = props;
+
+}

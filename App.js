@@ -84,11 +84,11 @@ class App extends Component {
   setSearchTopStories (result) {
     console.log("setSearchTopStories:");
     console.log(result);
-    const { hits, page, nbHits, nbPages } = result;
+    const { hits, page, nbHits, nbPages, hitsPerPage } = result;
     const oldhits = page !==0 ? this.state.result.hits : [];
     const updatedHits = [...oldhits, ...hits] ;
 
-    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage: this.hitsPerPage }});
+    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage }});
 
     //this.setState({result});
    // console.log(result);
@@ -125,6 +125,7 @@ class App extends Component {
     const page = (result && result.page) || 0;
     const nbPages = (result && result.nbPages) || 0;
     const hitsPerPage = this.state.hitsPerPage;
+    console.log("App component / Render Method");
     console.log(result);
 
     return (
