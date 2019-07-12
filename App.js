@@ -87,8 +87,8 @@ class App extends Component {
     const { hits, page, nbHits, nbPages, hitsPerPage } = result;
     const oldhits = page !==0 ? this.state.result.hits : [];
     const updatedHits = [...oldhits, ...hits] ;
-
-    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage }});
+    const count = updatedHits.length;
+    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage, count}});
 
     //this.setState({result});
    // console.log(result);
@@ -148,6 +148,8 @@ class App extends Component {
                               {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
                               {adat: result.hits},
                               {hitsPerPage},
+                              {nbHits: result.nbHits},
+                              {count: result.count},
                               )}
                     onDismiss ={this.onDismiss}
                     onUpdate ={this.onUpdate}

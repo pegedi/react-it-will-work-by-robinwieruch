@@ -82,12 +82,15 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                     
                        <TablePagination
                           rowsPerPageOptions={[10, 20, 40, 80]}
-                          rowsPerPage={list.hitsPerPage}
+                          rowsPerPage={20}
+                          count={list.nbHits}
+                          page={0}
                           SelectProps={{
-                            inputProps: { 'aria-label': 'Rows per page' },
+                            inputProps: { 'aria-label': 'Hits per page' },
                             native: true,
                             }}
                           ActionsComponent={TablePaginationActions}
+                          labelDisplayedRows = {paginationLabel}
                               />
                     </TableRow>
                  </TableFooter>
@@ -108,8 +111,16 @@ const useStyles1 = makeStyles(theme => ({
     flexShrink: 0,
     color: theme.palette.text.secondary,
     marginLeft: theme.spacing(2.5),
+    textAlign: "center",
   },
 }));
+function paginationLabel(props) {
+  console.log("PaginationLabel func");
+  console.log(props)
+  return(
+    `${props.to} lines of total ${props.count}`
+  )
+} 
 
 function TablePaginationActions(props) {
   const classes = useStyles1();
@@ -118,7 +129,7 @@ function TablePaginationActions(props) {
   return (
     <div className={classes.root}>
       <IconButton
-        
+         
         
         aria-label="Next"
       >
