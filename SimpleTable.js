@@ -37,6 +37,11 @@ function SimpleTable({list, onDismiss, onUpdate}) {
     const classes = useStyles();
     console.log("SimpleTable renders:");
     console.log(list);
+    function displayLabel(props) {
+      return (
+        `helló ${list.count} lines of total ${list.nbHits}`
+      );
+    }
     return (
        <Paper className={classes.root}>
             <Table className = {classes.table}>
@@ -82,7 +87,7 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                     
                        <TablePagination
                           rowsPerPageOptions={[10, 20, 40, 80]}
-                          rowsPerPage={20}
+                          rowsPerPage={list.hitsPerPage}
                           count={list.nbHits}
                           page={0}
                           SelectProps={{
@@ -90,7 +95,7 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                             native: true,
                             }}
                           ActionsComponent={TablePaginationActions}
-                          labelDisplayedRows = {paginationLabel}
+                          labelDisplayedRows = {displayLabel}
                               />
                     </TableRow>
                  </TableFooter>
