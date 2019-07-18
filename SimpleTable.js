@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -96,7 +97,7 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                             }}
                           ActionsComponent={TablePaginationActions}
                           labelDisplayedRows = {displayLabel}
-                              />
+                        />
                     </TableRow>
                  </TableFooter>
             
@@ -144,3 +145,10 @@ function TablePaginationActions(props) {
   );
 
 }
+
+TablePaginationActions.propTypes = {
+  count: PropTypes.number.isRequired,
+  onChangePage: PropTypes.func.isRequired,
+  page: PropTypes.number.isRequired,
+  rowsPerPage: PropTypes.number.isRequired,
+};
