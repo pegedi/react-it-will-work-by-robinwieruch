@@ -38,9 +38,10 @@ function SimpleTable({list, onDismiss, onUpdate}) {
     const classes = useStyles();
     console.log("SimpleTable renders:");
     console.log(list);
+
     function displayLabel(props) {
       return (
-        `helló ${list.count} lines of total ${list.nbHits}`
+        `helló ${list.adat.length} lines of total ${list.nbHits}`
       );
     }
     return (
@@ -83,7 +84,7 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                         </TableRow>
                     ))}
                 </TableBody>
-                <TableFooter>
+                <TableFooter key="-3">
                   <TableRow key= "-2">
                     
                        <TablePagination
