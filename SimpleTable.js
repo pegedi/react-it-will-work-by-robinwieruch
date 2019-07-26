@@ -16,7 +16,9 @@ import TableFooter from '@material-ui/core/TableFooter';
 
 const useStyles = makeStyles(theme => ({
     root: {
-      width: '100%',
+ //     width: '100%',
+      width: 'auto', 
+      display: 'table',
       marginTop: theme.spacing(3),
  //     overflowX: 'auto',
     },

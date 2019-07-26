@@ -44,7 +44,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-
+//**class representing an app */
 class App extends Component {
   constructor(props) {
     super(props);
