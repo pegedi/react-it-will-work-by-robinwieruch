@@ -15,6 +15,7 @@ import LastPageIcon from '@material-ui/icons/LastPage';
 import './style.css';
 
 
+//Check out that: query: https://www.algolia.com/doc/api-reference/api-parameters/offset/
 
 const DEFAULT_QUERY = 'redux';
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
@@ -44,7 +45,9 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-//**class representing an app */
+/**
+ * call App represent the table
+*/
 class App extends Component {
   constructor(props) {
     super(props);
@@ -52,6 +55,8 @@ class App extends Component {
       name: 'React',
       searchTerm: DEFAULT_QUERY,
       hitsPerPage: 20,
+      deletedLines: 0,
+
     };
     
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
