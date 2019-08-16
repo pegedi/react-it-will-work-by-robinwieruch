@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
@@ -36,7 +36,7 @@ const useStyles = makeStyles(theme => ({
   })
 );
 
-function SimpleTable({list, onDismiss, onUpdate}) {
+function SimpleTable({list, onDismiss, onUpdate, onLengthUpdate, enablePagination, onAdditionSubmit}) {
     const classes = useStyles();
     console.log("SimpleTable renders:");
     console.log(list);
@@ -46,22 +46,46 @@ function SimpleTable({list, onDismiss, onUpdate}) {
         `helló ${list.adat.length} lines of total ${list.nbHits}`
       );
     }
+
+    function TablePaginationActions(props) {
+      const classes = useStyles1();
+      const theme = useTheme();
+      const { page, hitsPerPage } = props;
+      console.log("function TablePaginationActions");
+
+      return (
+        <div className={classes.root}>
+          <IconButton onClick = {onAdditionSubmit} disabled={!enablePagination}
+            aria-label="Next"
+          >
+            <KeyboardArrowDown />
+          </IconButton>
+        </div>
+      );
+    }
+
+    TablePaginationActions.propTypes = {
+      count: PropTypes.number.isRequired,
+      page: PropTypes.number.isRequired,
+      rowsPerPage: PropTypes.number.isRequired,
+    };
+
     return (
        <Paper className={classes.root}>
             <Table className = {classes.table}>
                 <TableHead>
                     <TableRow key="-1">
-                        {list.headerRow.map( field => (
-                            <TableCell className={classes.head}>{field}</TableCell>
+                        {list.headerRow.map( (field, index) => (
+                            <TableCell key={"headerCell" + index} className={classes.head}>{field}</TableCell>
                         ))}
 
                     </TableRow>
                 </TableHead>
                 <TableBody>
                     
-                    {list.adat.map(row => (
+                    {list.adat.map((row, indexx) => (
                         <TableRow key={row.objectID} hover>
-                            <TableCell><a href={row.url}> {row.title} </a> </TableCell>
+                            <TableCell><a href={row.url}> {indexx + " " + row.title} </a> </TableCell>
                             <TableCell>{row.author}</TableCell>
                             <TableCell>{row.num_comments}</TableCell>
                             <TableCell>{row.points}</TableCell>
@@ -70,7 +94,8 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                                     variant="contained" 
                                     color="primary" 
                                     onClick={() => onDismiss(row.objectID)}
-                                    className = ''>
+                                    className = ''
+                                    key = {row.objectID + "button1"}>
                                     Dismiss
                                 </Button>
                             </TableCell>
@@ -79,7 +104,8 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                                     variant="contained" 
                                     color="primary" 
                                     onClick={() => onUpdate(row.objectID)}
-                                    className = ''>
+                                    className = ''
+                                    key = {row.objectID + "button2"}>
                                     Peti
                                 </Button>
                             </TableCell>
@@ -89,9 +115,10 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                 <TableFooter key="-3">
                   <TableRow key= "-2">
                     
-                       <TablePagination
+                       <MyTablePagination
                           rowsPerPageOptions={[10, 20, 40, 80]}
-                          rowsPerPage={list.hitsPerPage}
+                          downLoadLength={list.downLoadLength}
+                          labelRowsPerPage = 'Download Length'
                           count={list.nbHits}
                           page={0}
                           SelectProps={{
@@ -100,6 +127,8 @@ function SimpleTable({list, onDismiss, onUpdate}) {
                             }}
                           ActionsComponent={TablePaginationActions}
                           labelDisplayedRows = {displayLabel}
+                          onLengthUpdate = {onLengthUpdate}
+                          enablePagination = {list.adat.length < list.nbHits}
                         />
                     </TableRow>
                  </TableFooter>
@@ -131,27 +160,35 @@ function paginationLabel(props) {
   )
 } 
 
-function TablePaginationActions(props) {
-  const classes = useStyles1();
-  const theme = useTheme();
-  const { page, nbHits, hitsPerPage, onChangePage } = props;
+function MyTablePagination(props) {
+  const [downLoadLength, setDownLoadLength] = useState(props.downLoadLength);
+  
+  /**
+   * required function per propTypes
+   * custom log can be added
+   */
+  function handleChangePage(event, pageNum) {   
+  }
+
+  function handleChangeRowsPerPage(event){
+    props.onLengthUpdate(event.target.value);
+    setDownLoadLength(parseInt(event.target.value,10));
+  }
   return (
-    <div className={classes.root}>
-      <IconButton
-         
-        
-        aria-label="Next"
-      >
-        <KeyboardArrowDown />
-      </IconButton>
-    </div>
-  );
-
+    <TablePagination
+        rowsPerPageOptions={props.rowsPerPageOptions}
+        rowsPerPage={downLoadLength}
+        labelRowsPerPage = {props.labelRowsPerPage}
+        count={props.count}
+        page={0}
+        SelectProps={{
+          inputProps: { 'aria-label': 'Hits per page' },
+          native: true,
+          }}
+        ActionsComponent={props.ActionsComponent}
+        labelDisplayedRows = {props.labelDisplayedRows}
+        onChangeRowsPerPage={handleChangeRowsPerPage}
+        onChangePage={handleChangePage}
+      />
+  )
 }
-
-TablePaginationActions.propTypes = {
-  count: PropTypes.number.isRequired,
-  onChangePage: PropTypes.func.isRequired,
-  page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
-};

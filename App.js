@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component, useState} from 'react';
 import update from 'immutability-helper';
 import SimpleTable from './SimpleTable';
 import Hello from './Hello';
@@ -22,7 +22,9 @@ const PATH_BASE = 'https://hn.algolia.com/api/v1';
 const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
-const PARAM_HITSPERPAGE = 'hitsPerPage='
+const PARAM_HITSPERPAGE = 'hitsPerPage=';
+const PARAM_OFFSET = 'offset=';
+const PARAM_LENGTH = 'length=';
 const url = `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${DEFAULT_QUERY}`;
 
 const useStyles = makeStyles(theme => ({
@@ -51,20 +53,25 @@ const useStyles = makeStyles(theme => ({
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {result: null,
+    this.state = {
+      result: null,
       name: 'React',
-      searchTerm: DEFAULT_QUERY,
-      hitsPerPage: 20,
       deletedLines: 0,
-
+      enablePagination: false,
     };
-    
+
+    this.downLoadLength= 20;
+    this.offset = 0;
+    this.actualSearchTerm = '';
+    this.enteredSearchTerm = DEFAULT_QUERY,
+
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
     this.onUpdate = this.onUpdate.bind(this);
-    this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
+    this.onLengthUpdate = this.onLengthUpdate.bind(this);
+    this.onAdditionSubmit = this.onAdditionSubmit.bind(this);
   }
 
 /**
@@ -73,27 +80,45 @@ class App extends Component {
  * @param {number} page page number to fetch from the server
  * @param {number} hitsperPage hits per page
  */
-  fetchSearchTopStories(searchTerm, page = 0, hitsPerPage = 20){
-    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HITSPERPAGE}${hitsPerPage}`)
+  fetchSearchTopStories(searchTerm, pOffset = 0, downLoadLength = 20){
+    console.log(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_OFFSET}${pOffset}&${PARAM_LENGTH}${downLoadLength}`);
+
+    fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_OFFSET}${pOffset}&${PARAM_LENGTH}${downLoadLength}`)
       .then(response => response.json())
       .then(result => this.setSearchTopStories(result))
       .catch(error => error);
   }
-  onSearchSubmit(event) {
+  onSearchSubmit(pSearchString) {
     console.log("On Search Submit");
-    event.preventDefault();
-    const {searchTerm, hitsPerPage} = this.state;
-    this.fetchSearchTopStories(searchTerm, 0, hitsPerPage);
+    
+    //console.log(event);
+    this.enteredSearchTerm = pSearchString;
+    if (pSearchString !== this.actualSearchTerm) {
+      this.actualSearchTerm = pSearchString;
+      this.fetchSearchTopStories(pSearchString, 0, this.downLoadLength);
+    } 
+  }
+  onAdditionSubmit() {
+    this.fetchSearchTopStories(this.actualSearchTerm, this.state.result.hits.length + this.state.deletedLines, this.downLoadLength);
   }
 
   setSearchTopStories (result) {
     console.log("setSearchTopStories:");
     console.log(result);
-    const { hits, page, nbHits, nbPages, hitsPerPage } = result;
-    const oldhits = page !==0 ? this.state.result.hits : [];
+    console.log(this.actualSearchTerm);
+    console.log(this.enteredSearchTerm);
+
+    const { hits, offset, nbHits, length } = result;
+    const oldhits = offset !==0 ? this.state.result.hits : [];
+    const deletedLines = offset ==0 ? 0 : this.state.deletedLines;
+    console.log(hits);
     const updatedHits = [...oldhits, ...hits] ;
     const count = updatedHits.length;
-    this.setState({result: { hits: updatedHits, page, nbHits, nbPages, hitsPerPage, count}});
+    const enablePagination = count < nbHits;
+    this.setState({result: { hits: updatedHits, offset, nbHits,  count},
+                   deletedLines,
+                   enablePagination,
+                   });
 
     //this.setState({result});
    // console.log(result);
@@ -104,32 +129,42 @@ class App extends Component {
     const isNotId = item => item.objectID !== id;
     const updatedList = this.state.result.hits.filter(isNotId);
     this.setState({ 
-      result: Object.assign({},this.state.result, {hits: updatedList}) 
+      result: Object.assign({},this.state.result, {hits: updatedList}),
+      deletedLines: this.state.deletedLines + 1,
+      count: this.state.count - 1, 
     });
   }
-
+  
+  /**
+   * updates length property
+   */
+  onLengthUpdate(updatedDownLoadLength){
+    console.log("function: onLengthUpdate changed download length from "+this.downLoadLength+" to "+updatedDownLoadLength);
+    this.downLoadLength = updatedDownLoadLength;
+  }
+  
   onUpdate(id) {
     console.log('Hello onUpdate ' + id);
     const isNotId = item => item.objectID !== id;
     const indexnum = this.state.result.hits.findIndex(e => e.objectID === id);
     this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
   }
-  onSearchChange(e) {
-   //console.log(e.target.value);
-    this.setState({searchTerm: e.target.value});
-  }
-
+ 
   componentDidMount() {
-    const { searchTerm } = this.state;
     console.log("component mount");
-    this.fetchSearchTopStories(searchTerm);
 
+    const { searchTerm } = this.state;
+    if (searchTerm !== this.actualSearchTerm) {
+      this.actualSearchTerm = searchTerm;
+      this.fetchSearchTopStories(searchTerm);
+    }
   }
   render() {
-    const { searchTerm, result } = this.state;
+    const {result } = this.state;
+    const searchTerm = this.enteredSearchTerm;
     const page = (result && result.page) || 0;
     const nbPages = (result && result.nbPages) || 0;
-    const hitsPerPage = this.state.hitsPerPage;
+    const downLoadLength = this.downLoadLength;
     console.log("App component / Render Method");
     console.log(result);
 
@@ -142,7 +177,7 @@ class App extends Component {
           </p>
             <Search
               value = {searchTerm}
-              onChange = {this.onSearchChange}
+              
               onSubmit = {this.onSearchSubmit}
             >
               Search
@@ -152,20 +187,19 @@ class App extends Component {
                               {}, 
                               {headerRow: ["Title","Author","Comment Num","Points","Dismiss","Update"]},
                               {adat: result.hits},
-                              {hitsPerPage},
+                              {downLoadLength},
                               {nbHits: result.nbHits},
                               {count: result.count},
                               )}
                     onDismiss ={this.onDismiss}
                     onUpdate ={this.onUpdate}
+                    onLengthUpdate = {this.onLengthUpdate}
+                    enablePagination = {this.state.enablePagination}
+                    onAdditionSubmit = {this.onAdditionSubmit}
               />
               
             }
-            <div className="interactions">
-                <Button variant="contained" color="primary" onClick={() => this.fetchSearchTopStories(searchTerm, page + 1, hitsPerPage)}>
-                  More
-                </Button>
-            </div>
+            
          
           <p>
              Edit <code>App.js</code> and save to reload. Actually no save needed....
@@ -183,13 +217,27 @@ class App extends Component {
   }
 }
 
-const Search = ({value, onChange, onSubmit, children}) => {
+/**
+ * search section
+ */
+const Search = ({value, onSubmit, children}) => {
   //do something here
   const logo = "https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg";
   const classes = useStyles();
+  const [searchString, setSearchString] = useState(value);
+  
+  function searchFieldChange(e){
+    setSearchString(e.target.value);
+  }
+  
+  function searchFieldSubmit(e) {
+
+    e.preventDefault();
+    onSubmit(searchString);
+  }
 
   return (
-    <form onSubmit = {onSubmit}>
+    <form onSubmit = {searchFieldSubmit}>
        <TextField
         id="outlined-search"
         label="Search field"
@@ -197,8 +245,8 @@ const Search = ({value, onChange, onSubmit, children}) => {
         className={classes.textField}
         margin="normal"
         variant="outlined"
-        value={value}
-        onChange = {onChange}
+        value={searchString}
+        onChange = {searchFieldChange}
       />
 
       
