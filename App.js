@@ -54,7 +54,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      result: null,
+      results: {},
+      searchKey: '',
       name: 'React',
       deletedLines: 0,
       enablePagination: false,
@@ -62,7 +63,7 @@ class App extends Component {
 
     this.downLoadLength= 20;
     this.offset = 0;
-    this.actualSearchTerm = '';
+    this.actualSearchTerm = DEFAULT_QUERY;
     this.enteredSearchTerm = DEFAULT_QUERY,
 
     this.setSearchTopStories = this.setSearchTopStories.bind(this);
@@ -72,6 +73,8 @@ class App extends Component {
     this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     this.onLengthUpdate = this.onLengthUpdate.bind(this);
     this.onAdditionSubmit = this.onAdditionSubmit.bind(this);
+
+    this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
   }
 
 /**
@@ -81,6 +84,7 @@ class App extends Component {
  * @param {number} hitsperPage hits per page
  */
   fetchSearchTopStories(searchTerm, pOffset = 0, downLoadLength = 20){
+    console.log('--fetchSearchTopStories:');
     console.log(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_OFFSET}${pOffset}&${PARAM_LENGTH}${downLoadLength}`);
 
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_OFFSET}${pOffset}&${PARAM_LENGTH}${downLoadLength}`)
@@ -89,49 +93,67 @@ class App extends Component {
       .catch(error => error);
   }
   onSearchSubmit(pSearchString) {
-    console.log("On Search Submit");
-    
+    console.log('--onSearchSubmit:');
+    console.log('pSearchString = ' + pSearchString);
+    console.log('actualSearchTerm = ' + this.actualSearchTerm);
+
     //console.log(event);
     this.enteredSearchTerm = pSearchString;
     if (pSearchString !== this.actualSearchTerm) {
       this.actualSearchTerm = pSearchString;
-      this.fetchSearchTopStories(pSearchString, 0, this.downLoadLength);
+      this.setState({searchKey: pSearchString});
+      if (this.needsToSearchTopStories(pSearchString)) {
+        this.fetchSearchTopStories(pSearchString, 0, this.downLoadLength);
+      }
     } 
   }
+  needsToSearchTopStories(searchTerm) {
+    console.log('--needsToSearchTopStories: searchTerm=' + searchTerm);
+    return !this.state.results[searchTerm];
+  }
+
   onAdditionSubmit() {
-    this.fetchSearchTopStories(this.actualSearchTerm, this.state.result.hits.length + this.state.deletedLines, this.downLoadLength);
+    const {searchKey} = this.state; 
+    this.fetchSearchTopStories(searchKey, this.state.results[searchKey].hits.length + 
+                                                      this.state.results[searchKey].deletedLines, this.downLoadLength);
   }
 
   setSearchTopStories (result) {
-    console.log("setSearchTopStories:");
+    console.log("--setSearchTopStories:");
     console.log(result);
     console.log(this.actualSearchTerm);
-    console.log(this.enteredSearchTerm);
+    console.log(this.state.searchKey);
+    //console.log(this.enteredSearchTerm);
 
     const { hits, offset, nbHits, length } = result;
-    const oldhits = offset !==0 ? this.state.result.hits : [];
-    const deletedLines = offset ==0 ? 0 : this.state.deletedLines;
+    const {searchKey, results} = this.state;
+    const oldhits = offset !==0 ? this.state.results[searchKey].hits : [];
+    const deletedLines = offset ==0 ? 0 : this.state.results[searchKey].deletedLines;
     console.log(hits);
     const updatedHits = [...oldhits, ...hits] ;
     const count = updatedHits.length;
     const enablePagination = count < nbHits;
-    this.setState({result: { hits: updatedHits, offset, nbHits,  count},
-                   deletedLines,
+    this.setState({results: { ...results,
+                              [searchKey]: {hits: updatedHits, offset, nbHits,  count, deletedLines}},
                    enablePagination,
                    });
 
     //this.setState({result});
-   // console.log(result);
+    console.log(this.state);
   }
 
   onDismiss(id) {
-    console.log('Goodbye onDismiss, ID:  ' + id);
+    console.log('--onDismiss:');
     const isNotId = item => item.objectID !== id;
-    const updatedList = this.state.result.hits.filter(isNotId);
+    const {searchKey, results} = this.state;
+    const updatedList = this.state.results[searchKey].hits.filter(isNotId);
+    const updatedDeletedLines = this.state.results[searchKey].deletedLines + 1
+    const updatedCount = this.state.results[searchKey].count - 1
     this.setState({ 
-      result: Object.assign({},this.state.result, {hits: updatedList}),
-      deletedLines: this.state.deletedLines + 1,
-      count: this.state.count - 1, 
+      results: { ...results,
+                 [searchKey]: {hits: updatedList, 
+                               deletedLines: updatedDeletedLines,
+                               count: updatedCount}},
     });
   }
   
@@ -139,34 +161,43 @@ class App extends Component {
    * updates length property
    */
   onLengthUpdate(updatedDownLoadLength){
+    console.log('--onLengthUpdate:');
     console.log("function: onLengthUpdate changed download length from "+this.downLoadLength+" to "+updatedDownLoadLength);
     this.downLoadLength = updatedDownLoadLength;
   }
   
   onUpdate(id) {
-    console.log('Hello onUpdate ' + id);
+    console.log('--onUpdate: id= ' + id);
     const isNotId = item => item.objectID !== id;
-    const indexnum = this.state.result.hits.findIndex(e => e.objectID === id);
-    this.setState(update(this.state, {result: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}));
+    const {searchKey} = this.state;
+    const indexnum = this.state.results[searchKey].hits.findIndex(e => e.objectID === id);
+
+    this.setState(update(this.state, {results: { [searchKey]: {hits: {[indexnum]: {author: {$set: "Peti"}}}}}}));
+    
   }
  
   componentDidMount() {
-    console.log("component mount");
+    console.log("--componentDidMount:");
 
-    const { searchTerm } = this.state;
-    if (searchTerm !== this.actualSearchTerm) {
-      this.actualSearchTerm = searchTerm;
-      this.fetchSearchTopStories(searchTerm);
+    const { searchKey } = this.state;
+    if (searchKey !== this.actualSearchTerm) {
+      this.setState({searchKey: this.actualSearchTerm});
+     
+      this.fetchSearchTopStories(searchKey);
     }
   }
   render() {
-    const {result } = this.state;
+    const searchKey = this.actualSearchTerm;
+    const result = this.state.results[searchKey];
     const searchTerm = this.enteredSearchTerm;
     const page = (result && result.page) || 0;
     const nbPages = (result && result.nbPages) || 0;
     const downLoadLength = this.downLoadLength;
-    console.log("App component / Render Method");
+    console.log("--App.render Method:");
+    console.log("searchKey = " + searchKey)
     console.log(result);
+
+    console.log(this.state);
 
     return (
       <div className="page">
@@ -176,7 +207,7 @@ class App extends Component {
             Start editing to see some magic happen :)
           </p>
             <Search
-              value = {searchTerm}
+              value = {searchKey}
               
               onSubmit = {this.onSearchSubmit}
             >
